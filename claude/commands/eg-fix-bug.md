@@ -61,6 +61,8 @@ Spawn a fresh agent with `Agent` tool:
 
 The goldfish gets ONLY the symptom + repro from Step 1. It does NOT get your hypothesised root cause — that asymmetry is the point.
 
+**Cross-model diagnosis (optional):** ask via `AskUserQuestion` using the template in [../cross-model-providers.md](../cross-model-providers.md), naming the pass "the diagnosis goldfish." If the user selects one or more providers, run the same symptom+repro prompt below through each provider's invocation recipe in that doc, alongside the Claude goldfish — a second independent diagnosis from a different model is a stronger convergence/divergence signal than the Claude goldfish alone. Fail-soft per that doc.
+
 **Prompt body to send (between markers, exclusive):**
 
 ```
@@ -81,9 +83,9 @@ End with the literal string `diagnosis complete`.
 <<<DIAG_END>>>
 ```
 
-**Compare goldfish output to your Step 1 hypothesis.**
-- Convergence (top candidate matches your hypothesis): proceed to Step 3 with confidence.
-- Divergence: re-investigate. Read the goldfish's evidence. If it is right, update the problem doc and tell the user "goldfish flagged a different root cause; re-diagnosing." If you are right, write down WHY the goldfish was wrong — that disagreement is itself useful signal.
+**Compare goldfish output to your Step 1 hypothesis** (and, if run, each cross-model provider's output — tag it `[lens: Cross-model — <Provider>]`).
+- Convergence (top candidate matches your hypothesis): proceed to Step 3 with confidence. Convergence across Claude AND an external model is stronger confidence than either alone.
+- Divergence: re-investigate. Read the goldfish's evidence. If it is right, update the problem doc and tell the user "goldfish flagged a different root cause; re-diagnosing." If you are right, write down WHY the goldfish was wrong — that disagreement is itself useful signal. If a cross-model pass diverged from both, note it as a separate signal worth mentioning in the final report even if you don't act on it.
 
 If the bug is genuinely tiny (1-3 line fix in a clearly-identified location), you may skip the goldfish call — but only when the location is mechanically obvious. When in doubt, run it.
 
@@ -146,7 +148,7 @@ Print to the user:
 - Root cause (one line)
 - Fix (file:line)
 - Test that captures it (file:test name)
-- Goldfish-vs-elephant agreement (converged / diverged + why)
+- Goldfish-vs-elephant agreement (converged / diverged + why), including any cross-model provider run and whether it agreed
 - `/eg-precommit-review` outcome (rounds, fixes, rebuttals verbatim)
 - Test gate status
 

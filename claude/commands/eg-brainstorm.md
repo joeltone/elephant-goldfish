@@ -54,7 +54,9 @@ Ask three questions in sequence (one `AskUserQuestion` call each):
   2. **On, focused** — "Search only for prior art / comparable products / market context. Don't go off on tangents."
   3. **Off** — "First-principles only. No web search. Useful for purely creative or speculative work."
 
-Cache the three answers. They drive the goldfish prompts and the synthesis step.
+**Q3.5 — Cross-model lens:** use the template in [../cross-model-providers.md](../cross-model-providers.md) ("The 'which provider' question template"), naming the pass "one extra divergent lens" and defaulting the recommended option to DeepSeek (matches this command's prior behavior of always running it). `multiSelect: true` — the user may pick DeepSeek, Microsoft Copilot, both, or None.
+
+Cache all four answers. They drive the goldfish prompts and the synthesis step.
 
 ## Step 1: Draft the seed
 
@@ -144,11 +146,13 @@ End with the literal string `lens complete`.
 
 Substitute `<LENS NAME>`, `<PASTE FULL SEED FROM STEP 1>`, `<PER-LENS COUNT>`, and the conditional web-research line per goldfish.
 
-## Step 2.5: Cross-model goldfish (DeepSeek)
+## Step 2.5: Cross-model goldfish (optional)
 
-In addition to the Claude-based goldfish in Step 2, **always** run one more lens through a different model provider (DeepSeek) for a genuinely independent perspective — not just a different prompt, a different model. This goldfish is not spawned via the `Agent` tool (that tool only launches Claude subagents); it's a direct API call via `Bash`.
+For each provider selected in Q3.5 (none, one, or both), run one more lens through that provider for a genuinely independent perspective — not just a different prompt, a different model. See [../cross-model-providers.md](../cross-model-providers.md) for the full invocation mechanics and fail-soft policy; this step only fills in the brainstorm-specific prompt.
 
-**Lens name:** "Cross-model perspective (DeepSeek)". Give it the same generic remit as the others, without a narrow angle to fill — its differentiator is the model, not a slot in the lens kit:
+Skip this step entirely if Q3.5 was "None."
+
+**Lens name:** "Cross-model perspective (<Provider>)". Give it the same generic remit as the others, without a narrow angle to fill — its differentiator is the model, not a slot in the lens kit:
 
 ```
 <<<BRAINSTORM_START>>>
@@ -166,36 +170,11 @@ End with the literal string `lens complete`.
 <<<BRAINSTORM_END>>>
 ```
 
-**Invocation** — run via `Bash`, using `secret-tool` inline so the call works regardless of shell (no dependency on direnv or an ambient env var):
+Substitute `<PASTE FULL SEED FROM STEP 1>` and `<PER-LENS COUNT>`, then run it through each selected provider's invocation recipe from [../cross-model-providers.md](../cross-model-providers.md). If both DeepSeek and Microsoft Copilot were selected, run both — they're independent passes, not alternatives.
 
-```bash
-DEEPSEEK_KEY="$(secret-tool lookup service deepseek account api 2>/dev/null)"
-if [ -z "$DEEPSEEK_KEY" ]; then
-  echo "DEEPSEEK_LENS_SKIPPED: no key in libsecret (secret-tool lookup service deepseek account api returned empty)"
-else
-  PROMPT_FILE=$(mktemp)
-  cat > "$PROMPT_FILE" <<'EOF'
-<the filled-in prompt above, with SEED and PER-LENS COUNT substituted>
-EOF
-  jq -n --rawfile p "$PROMPT_FILE" '{model: "deepseek-chat", messages: [{role: "user", content: $p}]}' \
-    | curl -sS --max-time 60 https://api.deepseek.com/chat/completions \
-        -H "Authorization: Bearer $DEEPSEEK_KEY" \
-        -H "Content-Type: application/json" \
-        -d @- > /tmp/deepseek_lens_response.json
-  rm -f "$PROMPT_FILE"
+**On failure** (missing key, network error, malformed response, or a response that doesn't end with `lens complete`): skip that provider's lens, do **not** stop the brainstorm run, and carry a one-line note forward — `<Provider> lens unavailable: <reason>` — for the Final Report. The Claude goldfish outputs are sufficient to proceed without it.
 
-  if [ $? -ne 0 ] || jq -e '.error' /tmp/deepseek_lens_response.json >/dev/null 2>&1; then
-    echo "DEEPSEEK_LENS_SKIPPED: request failed or API returned an error"
-    jq -r '.error.message // "no error body"' /tmp/deepseek_lens_response.json 2>/dev/null
-  else
-    jq -r '.choices[0].message.content' /tmp/deepseek_lens_response.json
-  fi
-fi
-```
-
-**On failure** (missing key, network error, malformed response, or a response that doesn't end with `lens complete`): skip this lens, do **not** stop the brainstorm run, and carry a one-line note forward — `DeepSeek lens unavailable: <reason>` — for the Final Report. The Claude goldfish outputs are sufficient to proceed without it.
-
-**On success:** treat its output exactly like any other goldfish's — feed it into Step 3 (contrarian sweep) and Step 4 (synthesis) — but tag every concept from it `[lens: Cross-model — DeepSeek]` rather than a Claude lens name, so Step 4 can call out cross-model agreement/disagreement specifically (see Step 4 below).
+**On success:** treat its output exactly like any other goldfish's — feed it into Step 3 (contrarian sweep) and Step 4 (synthesis) — but tag every concept from it `[lens: Cross-model — <Provider>]` rather than a Claude lens name, so Step 4 can call out cross-model agreement/disagreement specifically (see Step 4 below).
 
 ## Step 3: Optional contrarian sweep
 
@@ -233,9 +212,10 @@ WHAT THE GOLDFISH AGREED ON
 WHAT THEY DISAGREED ON
 - <2-3 bullets — divergence is where the interesting questions live>
 
-CROSS-MODEL CHECK (if the DeepSeek lens ran)
-- <Did DeepSeek's concepts land in the same clusters as the Claude lenses, or somewhere none of them touched? Call out convergence or divergence explicitly — a different model reaching the same place is a stronger signal than another same-model lens agreeing; a different model going somewhere else is the cheapest sign of anchoring you'll get.>
-- If the lens was skipped, say so here: "DeepSeek lens unavailable: <reason>" instead of the above.
+CROSS-MODEL CHECK (if any cross-model lens ran)
+- <Per provider that ran (DeepSeek, Microsoft Copilot, or both): did its concepts land in the same clusters as the Claude lenses, or somewhere none of them touched? Call out convergence or divergence explicitly — a different model reaching the same place is a stronger signal than another same-model lens agreeing; a different model going somewhere else is the cheapest sign of anchoring you'll get.>
+- If a selected provider's lens was skipped, say so here: "<Provider> lens unavailable: <reason>" instead of the above.
+- If Q3.5 was "None," omit this section.
 
 OPEN QUESTIONS FOR THE USER
 - <bullet list of things only the user can answer: priorities, constraints, taste>
@@ -306,7 +286,7 @@ If **Drop it**: print one-line acknowledgement and stop.
 
 Print to the user:
 - Seed (one line)
-- Number of goldfish run, with lenses (including whether the DeepSeek cross-model lens ran or was skipped, and why)
+- Number of goldfish run, with lenses (including which cross-model provider(s), if any, were selected in Q3.5, and whether each ran or was skipped, and why)
 - Number of concepts surfaced (post-dedup)
 - Top 3 ranked picks with one-line reasoning each
 - Where the brief was saved (if anywhere)

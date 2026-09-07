@@ -26,6 +26,22 @@ This fork diverges from [vshvedov/elephant-goldfish](https://github.com/vshvedov
 
 Combine this with running Claude Code on a metered API key (rather than a Pro/Max subscription) and a workspace spend cap in the Claude Console, if usage limits — not just cost — are the problem you're solving for.
 
+## Fork note: optional cross-model passes (Claude adapter)
+
+Every `eg-*` command in `claude/commands/` can now run one pass through an external model provider — DeepSeek or a Microsoft Copilot Studio agent — alongside the normal Claude goldfish, for a genuinely independent second opinion (a different model, not just a different prompt on Claude). This is **opt-in per run**: each command asks via `AskUserQuestion` before spawning the pass, defaults to none selected, and is fully fail-soft — a missing API key or a network error skips that provider with a one-line note and never blocks the command.
+
+- **DeepSeek**: brainstorm's cross-model lens, PRD's cross-model research lens, fix-bug's cross-model diagnosis, new-feature's cross-model design critic (informational, doesn't gate the design), precommit-review's cross-model reviewer pass.
+- **Microsoft Copilot**: same five hook points, reached via a published Copilot Studio agent's Direct Line channel.
+
+Setup: store credentials in libsecret —
+```sh
+secret-tool store --label="DeepSeek API key" service deepseek account api
+secret-tool store --label="Copilot Studio Direct Line secret" service ms-copilot account directline-secret
+```
+Skip either (or both) and the corresponding option just won't do anything when picked — the command reports it as unavailable and proceeds Claude-only.
+
+See [claude/cross-model-providers.md](claude/cross-model-providers.md) for the full invocation mechanics (this is the single source of truth every command references, so a new provider — or a fix to an existing one — only needs updating in one place). This is Claude-adapter-only for now; Codex and Gemini don't have the equivalent hook points yet.
+
 ## How to install
 
 ### Claude Code

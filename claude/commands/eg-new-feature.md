@@ -98,6 +98,8 @@ Each pass uses `subagent_type: "general-purpose"` and gets ONLY the design doc (
 
 **Round 1 runs all three passes; round 2+ skips comprehension** (revisions are gap-driven, not structural — once the doc reads cleanly, it almost always still reads cleanly). On every round, run critic and readiness.
 
+**Cross-model critic (optional, round 1 only):** before spawning the three passes, ask via `AskUserQuestion` using the template in [../cross-model-providers.md](../cross-model-providers.md), naming the pass "the design critic." If the user selects one or more providers, run Pass B's exact prompt (below) through each provider's invocation recipe in that doc — see **Pass D** below. Like comprehension, this pass is **informational**, not gating: the ready/not-ready decision stays "critic (Pass B) AND readiness (Pass C) both sign off," unaffected by what the cross-model pass says. Its value is a genuinely independent second read of the same doc, not a second vote.
+
 ### Pass A — Comprehension (round 1 only)
 
 `description: "Goldfish comprehension check"`. Verifies the doc reads cleanly to a cold reader.
@@ -192,9 +194,15 @@ DESIGN DOC:
 <<<READINESS_END>>>
 ```
 
+### Pass D — Cross-model critic (optional, round 1 only, informational)
+
+Only runs if the user selected one or more providers above. Reuses Pass B's exact prompt body verbatim (same `<<<DESIGN_START>>>`/`<<<DESIGN_END>>>` template, same design doc), sent through each selected provider's invocation recipe in [../cross-model-providers.md](../cross-model-providers.md) instead of via `Agent`. Fail-soft per that doc: on failure, skip and carry `<Provider> critic pass unavailable: <reason>` forward; on success, tag its output `[lens: Cross-model — <Provider>]`.
+
+Compare its gaps and verdict (`design ready` / `design needs revision`) against Pass B's. Convergence (same verdict, overlapping gaps) is a stronger signal than Pass B alone; divergence — especially a gap the cross-model pass caught that Pass B missed — is worth folding into the revise prompt even though it doesn't independently gate the round.
+
 ### Triage and loop
 
-A round is **ready** iff Pass B closes with `design ready` AND Pass C closes with `implementation ready`. Comprehension is informational: log it, surface it to the user, but do not gate progress on it. If comprehension returns `comprehension unclear` AND the round is otherwise ready, still proceed — but flag in the final report that the doc was unclear in places.
+A round is **ready** iff Pass B closes with `design ready` AND Pass C closes with `implementation ready`. Comprehension and the cross-model critic (Pass D) are both informational: log them, surface them to the user, but do not gate progress on either. If comprehension returns `comprehension unclear` AND the round is otherwise ready, still proceed — but flag in the final report that the doc was unclear in places. If Pass D surfaced a gap Pass B missed, fold it into the revise prompt (see below) even on an otherwise-ready round.
 
 If a round is **not ready**, bundle the critic gaps and readiness open questions into a single revise prompt:
 
@@ -277,7 +285,7 @@ Print to the user:
 - Feature summary (one line)
 - Files touched (grouped by layer: [BOOTSTRAP: layer names per stack])
 - Tests added (file:test name each)
-- Design-check result (gaps surfaced and how each was resolved)
+- Design-check result (gaps surfaced and how each was resolved), including whether a cross-model critic pass ran and whether it converged with Pass B
 - `/eg-precommit-review` outcome (rounds, fixes, rebuttals verbatim)
 - Test gate status
 - [BOOTSTRAP: walkthrough field, e.g. "Chrome MCP walkthrough summary (golden path + which edge cases were exercised; cross-tenant verification result)" / "Simulator walkthrough summary (which platform, golden path + failure modes exercised)"]
