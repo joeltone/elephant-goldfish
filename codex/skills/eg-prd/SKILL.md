@@ -5,6 +5,8 @@ description: Build a PRD with Codex using codebase grounding, gap-filling, resea
 
 # EG PRD Skill
 
+**Cost tip:** this skill only does drafting and research — no code is written. Codex has no per-skill model override, so if cost matters, set a cheap model as your default `~/.codex/config.toml` profile and invoke `$eg-prd` from a session on that profile.
+
 Build a Product Requirements Document from a rough idea. Use the user's text around the `$eg-prd` skill mention as the seed. If no seed is provided, ask for one.
 
 If the seed is a GitHub issue URL or `#<number>`, fetch it with `gh issue view <number>` and use its title and body as the seed.

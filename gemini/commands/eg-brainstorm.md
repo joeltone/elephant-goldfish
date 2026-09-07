@@ -3,6 +3,8 @@ name: eg-brainstorm
 description: Generate divergent concept ideas for a rough idea using parallel goldfish, web research, and structured synthesis. Use this for early-stage thinking, half-formed app ideas, or strategy stress-testing.
 ---
 
+**Cost tip:** this skill only does ideation — no code is written. If cost matters, run `/model set <cheap-model>` before invoking it.
+
 Brainstorm a new concept using the elephant/goldfish workflow, **inverted**: instead of one goldfish stress-testing the elephant's plan, you spawn **multiple** goldfish in parallel using `invoke_agent` (`agent_name="generalist"`), each with a different lens, each free to be creative and pull from the web. Their lack of shared context with the elephant is the point — they generate divergent ideas, not convergent ones. The elephant then synthesizes.
 
 Use this for **early-stage** thinking: a half-formed app idea, an "I wonder if X" question, a feature whose problem is clear but whose shape isn't, a strategy you're stress-testing before committing. Not for implementation work — for that, hand off to the `eg-new-feature` skill at the end.

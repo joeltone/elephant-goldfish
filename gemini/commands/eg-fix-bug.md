@@ -57,6 +57,8 @@ Investigate. Where in the codebase is the bug most likely to live? Cite specific
 
 ## Step 3: Capture the bug as a failing test BEFORE fixing
 
+**Cost tip:** if you're running on a cheaper default model for diagnosis/goldfish work, this is the checkpoint to run `/model set <stronger-model>` before continuing — everything from here on is code.
+
 The verification criterion lives in code, not in chat. Pick the right tier:
 
 [BOOTSTRAP: test tier picks — replace with concrete options for this stack.]

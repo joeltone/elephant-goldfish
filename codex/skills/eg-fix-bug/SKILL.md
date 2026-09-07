@@ -58,6 +58,8 @@ Compare the goldfish output to your hypothesis. If it diverges and the goldfish 
 
 ## Failing Test
 
+**Cost tip:** Codex CLI has no documented mid-session model switch, so a cheap default profile was locked in at `codex` startup. Everything from here on is code — for a costlier bug, it's cleaner to stop after the diagnosis above, start a fresh Codex session with a stronger `--profile`, and hand it the problem doc + goldfish diagnosis to continue from here.
+
 Capture the bug as a failing test before fixing.
 
 Choose the narrowest test tier that captures the bug. Infer test locations and commands from AGENTS.md, CLAUDE.md, package manifests, framework conventions, and CI config.

@@ -9,7 +9,7 @@ Important: current Codex builds do not support project-defined custom slash comm
 There is no local working copy on the target machine — you got here by streaming this file's text through `gh api`. Fetch the remaining Codex files the same way, on demand:
 
 ```sh
-gh api repos/vshvedov/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
+gh api repos/joeltone/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
 ```
 
 Files this procedure references later:
@@ -45,7 +45,7 @@ for f in \
   codex/skills/eg-new-feature/agents/openai.yaml \
   codex/skills/eg-precommit-review/SKILL.md \
   codex/skills/eg-precommit-review/agents/openai.yaml; do
-  gh api "repos/vshvedov/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish-codex/${f}"
+  gh api "repos/joeltone/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish-codex/${f}"
 done
 ```
 

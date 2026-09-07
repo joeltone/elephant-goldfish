@@ -7,7 +7,7 @@ This file is read by Claude Code. The user has pointed you at this repo and aske
 There is no local working copy on the target machine — you got here by streaming this file's text through `gh api`. Fetch the remaining files (the five command templates and the CLAUDE.md snippet) the same way, on demand:
 
 ```sh
-gh api repos/vshvedov/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
+gh api repos/joeltone/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
 ```
 
 Files this procedure references later:
@@ -24,7 +24,7 @@ Recommended: fetch them all up front into a tmp dir, then read locally through t
 ```sh
 mkdir -p /tmp/elephant-goldfish/claude/commands
 for f in claude/snippet.md claude/commands/eg-brainstorm.md claude/commands/eg-prd.md claude/commands/eg-fix-bug.md claude/commands/eg-new-feature.md claude/commands/eg-precommit-review.md; do
-  gh api "repos/vshvedov/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish/${f}"
+  gh api "repos/joeltone/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish/${f}"
 done
 ```
 
@@ -109,7 +109,7 @@ Create `<target>/.claude/commands/{eg-brainstorm,eg-prd,eg-fix-bug,eg-new-featur
 
 ## Step 4: Update CLAUDE.md
 
-Read the snippet from your prefetched copy at `/tmp/elephant-goldfish/claude/snippet.md` (or fetch on demand with `gh api repos/vshvedov/elephant-goldfish/contents/claude/snippet.md -H 'Accept: application/vnd.github.raw'` if you skipped the prefetch step at the top of this file). Tailor the placeholders in it to match the target's setup (dev URL, project-specific commands if any) and inject it into the target's `CLAUDE.md`.
+Read the snippet from your prefetched copy at `/tmp/elephant-goldfish/claude/snippet.md` (or fetch on demand with `gh api repos/joeltone/elephant-goldfish/contents/claude/snippet.md -H 'Accept: application/vnd.github.raw'` if you skipped the prefetch step at the top of this file). Tailor the placeholders in it to match the target's setup (dev URL, project-specific commands if any) and inject it into the target's `CLAUDE.md`.
 
 - If the target already has a `CLAUDE.md`, inject the snippet near the top (after the project overview, before existing workflow sections).
 - If no `CLAUDE.md` exists, propose creating one and ask the user before writing. Seed it with: project overview placeholder, the snippet, and a stub for build/test commands.

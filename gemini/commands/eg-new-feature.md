@@ -153,6 +153,8 @@ Then re-run Pass B and Pass C against the revised doc (skip Pass A — see above
 
 ## Step 3: Implementation plan
 
+**Cost tip:** if you're running on a cheaper default model for design/goldfish work, this is the checkpoint to run `/model set <stronger-model>` before continuing — everything from here on is code.
+
 Once the design doc is `design ready`, write a short ordered implementation plan in chat:
 
 [BOOTSTRAP: implementation layer ordering for this stack.]

@@ -141,6 +141,8 @@ Then re-run Pass B and Pass C against the revised doc (skip Pass A — see above
 
 ## Implementation
 
+**Cost tip:** Codex CLI has no documented mid-session model switch, so if you're running this skill under a cheap default profile, that choice was locked in at `codex` startup. Everything from here on is code — for a costlier feature, it's cleaner to stop after the design doc closes both gates above, start a fresh Codex session with a stronger `--profile`, and hand it the approved design doc to continue from Implementation onward.
+
 **Pre-flight check before any code edit:** confirm the previous section closed both Pass B (Critic) AND Pass C (Readiness). If either is still open, the No-Code Gate from the Design Doc section still applies — return to the design check instead of proceeding.
 
 Once the design is `design ready`, write a short ordered implementation plan.

@@ -7,7 +7,7 @@ This file is read by Gemini CLI. The user has pointed you at this repo and asked
 There is no local working copy on the target machine — you got here by streaming this file's text through `gh api`. Fetch the remaining files (the five skill templates and the GEMINI.md snippet) the same way, on demand:
 
 ```sh
-gh api repos/vshvedov/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
+gh api repos/joeltone/elephant-goldfish/contents/<PATH> -H 'Accept: application/vnd.github.raw'
 ```
 
 Files this procedure references later:
@@ -24,7 +24,7 @@ Recommended: fetch them all up front into a tmp dir, then read locally through t
 ```sh
 mkdir -p /tmp/elephant-goldfish/gemini/commands
 for f in gemini/gemini-md-snippet.md gemini/commands/eg-brainstorm.md gemini/commands/eg-prd.md gemini/commands/eg-fix-bug.md gemini/commands/eg-new-feature.md gemini/commands/eg-precommit-review.md; do
-  gh api "repos/vshvedov/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish/${f}"
+  gh api "repos/joeltone/elephant-goldfish/contents/${f}" -H 'Accept: application/vnd.github.raw' > "/tmp/elephant-goldfish/${f}"
 done
 ```
 

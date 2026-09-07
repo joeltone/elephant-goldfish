@@ -5,6 +5,8 @@ description: Generate divergent concept ideas with parallel Codex goldfish and s
 
 # EG Brainstorm Skill
 
+**Cost tip:** this skill only does ideation — no code is written. Codex has no per-skill model override, so if cost matters, set a cheap model as your default `~/.codex/config.toml` profile and invoke `$eg-brainstorm` from a session on that profile.
+
 Brainstorm a new concept using the elephant/goldfish workflow inverted: multiple fresh goldfish generate divergent ideas, then the elephant synthesizes.
 
 Use the user's text around the `$eg-brainstorm` skill mention as the rough idea. If no idea is provided, ask for one.

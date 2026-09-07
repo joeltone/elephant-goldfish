@@ -3,6 +3,8 @@ name: eg-prd
 description: Build a thorough Product Requirements Document from a rough idea. Uses codebase grounding, structured gap-filling, deep research, and parallel goldfish synthesis.
 ---
 
+**Cost tip:** this skill only does drafting and research — no code is written. If cost matters, run `/model set <cheap-model>` before invoking it.
+
 Build a Product Requirements Document for an idea or feature, with high rigor: ground the request in the actual codebase, surface every gap in the user's description and resolve them through structured Q&A, then run deep research (web search, parallel goldfish) before synthesizing the PRD. Output is the PRD itself, ready to feed into `eg-new-feature` or be saved as a durable artifact.
 
 If the user gave a GitHub issue URL or `#<number>`, fetch it first with `run_shell_command` using `gh issue view <number>` and use its title + body as the seed.
