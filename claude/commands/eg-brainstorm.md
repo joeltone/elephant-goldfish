@@ -1,6 +1,7 @@
 ---
 description: Generate divergent concept ideas for a raw thought using parallel goldfish, web research, and structured synthesis
 argument-hint: rough idea, problem space, or strategic question
+model: haiku
 ---
 
 Brainstorm a new concept using the elephant/goldfish workflow, **inverted**: instead of one goldfish stress-testing the elephant's plan, you spawn **multiple** goldfish in parallel, each with a different lens, each free to be creative and pull from the web. Their lack of shared context with the elephant is the point — they generate divergent ideas, not convergent ones. The elephant then synthesizes.

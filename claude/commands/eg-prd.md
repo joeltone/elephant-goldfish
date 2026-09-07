@@ -1,6 +1,7 @@
 ---
 description: Build a thorough PRD from a rough idea: codebase grounding, structured gap-filling, deep research, parallel goldfish synthesis
 argument-hint: idea or feature description (the PRD's seed)
+model: haiku
 ---
 
 Build a Product Requirements Document for an idea or feature, with high rigor: ground the request in the actual codebase, surface every gap in the user's description and resolve them through structured Q&A, then run deep research (web search, parallel goldfish, optional Chrome MCP for logged-in sources) before synthesizing the PRD. Output is the PRD itself, ready to feed into `/eg-new-feature` or be saved as a durable artifact.
