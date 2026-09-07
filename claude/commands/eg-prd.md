@@ -54,7 +54,9 @@ Three questions in sequence (one `AskUserQuestion` call each):
   3. **Hand off to `/eg-new-feature` after** — "Once the PRD is approved, end with the literal `/eg-new-feature <one-line summary>` so the next step is one command away."
   4. **Save to memory** — "Persist as a durable note (e.g. CLAUDE.md or your memory system) for future sessions to recall. Prefer this for cross-cutting policies the PRD discovers, not the full doc."
 
-Cache the three answers. They drive the rest of the run.
+**Q3.5 — Cross-model research lens:** if Q2 was not "None," use the template in [../cross-model-providers.md](../cross-model-providers.md) ("The 'which provider' question template"), naming the pass "one research lens" — `multiSelect: true`, options DeepSeek / Microsoft Copilot / None. Skip this question entirely if Q2 was "None" (no research goldfish run at all, so there's nothing to add a cross-model pass to).
+
+Cache all answers. They drive the rest of the run.
 
 ## Step 1: Ground in the codebase
 
@@ -161,11 +163,14 @@ End with the literal string `lens complete`.
 <<<RESEARCH_END>>>
 ```
 
+**Cross-model research lens (if Q3.5 selected one or more providers):** for each provider selected, run one more copy of the same prompt above (with `<LENS NAME>` set to "Cross-model perspective (<Provider>)" and no narrow angle — trust the model's own instincts against the seed) through that provider's invocation recipe in [../cross-model-providers.md](../cross-model-providers.md), instead of via `Agent`. Fail-soft per that doc: on failure, skip and carry `<Provider> research lens unavailable: <reason>` into the research summary; on success, tag its findings `[lens: Cross-model — <Provider>]`.
+
 After all goldfish return, the elephant prints a **research summary** (no synthesis yet — that's Step 5):
 
 - One section per lens, each with the goldfish's findings + implications.
 - Sources consolidated at the end.
 - Anything the goldfish flagged as "needs human verification" surfaced explicitly.
+- If any cross-model lens ran, a short **cross-model check**: did it converge with the Claude lenses or surface something none of them touched?
 
 If a goldfish stopped to ask about a Chrome MCP navigation, surface the question to the user via `AskUserQuestion`:
 
@@ -283,7 +288,7 @@ Print to the user:
 - Depth + research scope chosen
 - Codebase brief one-line summary
 - Gaps surfaced / filled / deferred (counts)
-- Research lenses run
+- Research lenses run (including which cross-model provider(s), if any, were selected in Q3.5, and whether each ran or was skipped, and why)
 - Where the PRD lives now (file path, memory entry, both, or chat-only)
 - Next action (e.g. "Run `/eg-new-feature ...` when ready" or "Open questions need user input before this is shippable")
 

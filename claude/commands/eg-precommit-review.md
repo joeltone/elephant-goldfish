@@ -21,6 +21,8 @@ The only opt-out: if the user, in the same turn that invoked this skill, explici
 
 **Run it for everything else,** including small bug fixes — small diffs hide bugs disproportionately well.
 
+**Cross-model reviewer (optional, round 1 only):** if the loop is running, ask via `AskUserQuestion` using the template in [../cross-model-providers.md](../cross-model-providers.md), naming the pass "the reviewer." Cache the answer for Step 2.
+
 ## Step 1: Pre-flight (sequentially, NOT chained with `&&`)
 
 Each of these is independent — do not short-circuit on a single failure.
@@ -123,6 +125,8 @@ Output format: numbered list. For each finding, lead with `file:line` then the i
 <<<TEMPLATE_END>>>
 ```
 
+**Cross-model reviewer (round 1 only, if selected in Step 0):** run the identical template above — same substitution rules, no additional framing — through each selected provider's invocation recipe in [../cross-model-providers.md](../cross-model-providers.md), instead of via `Agent`. Fail-soft per that doc: on failure, skip and carry `<Provider> reviewer pass unavailable: <reason>` into the final report. On success, feed its findings into Step 3 exactly like the Claude reviewer's, but prefix each with `[Cross-model — <Provider>]` so the ledger and final report can distinguish them. Do NOT re-run the cross-model pass on rounds 2+ — it's a one-shot independent read, not part of the fix/re-verify loop (re-running it against your own fixes would just be asking it to review its own prior finding).
+
 ## Step 3: Triage the findings
 
 For each finding the reviewer returns:
@@ -177,8 +181,9 @@ Typical loop length: 2-3 rounds. If you're at 5+ without exit, the implementatio
 
 Once the loop exits, print to the user:
 - Rounds run
-- Findings fixed (with file:line each)
+- Findings fixed (with file:line each, noting which came from the Claude reviewer vs. a cross-model pass)
 - Findings rebutted (with the **verbatim** one-line reason each, not summarized)
 - Whether any pre-existing lint/typecheck/test errors were noted as out-of-scope
+- Whether a cross-model reviewer ran, which provider(s), and whether it agreed with the Claude reviewer or caught something distinct
 
 **STOP at this step.** Do NOT run `git commit`, do NOT run `git add`, and do NOT prompt "want me to commit?" — even in auto mode. Wait for the user's literal commit instruction. [BOOTSTRAP: commit policy reminder, e.g. "Follow the commit convention visible in `git log` (plain message, optional `Fix #<n>:` reference)." or "No `Co-Authored-By: Claude` trailers." Tailor based on what was observed.]
