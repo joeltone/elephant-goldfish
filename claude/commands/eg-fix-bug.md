@@ -89,6 +89,8 @@ If the bug is genuinely tiny (1-3 line fix in a clearly-identified location), yo
 
 ## Step 3: Capture the bug as a failing test BEFORE fixing
 
+**Cost tip:** if you're running on a cheaper default model for diagnosis/goldfish work, this is the checkpoint to run `/model sonnet` (or your preferred stronger model) before continuing — everything from here on is code.
+
 The verification criterion lives in code, not in chat. Pick the right tier:
 
 [BOOTSTRAP: test tier picks — replace with concrete options for this stack. Examples:

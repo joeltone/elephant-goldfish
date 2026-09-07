@@ -16,6 +16,16 @@ Most of the AI agents are working fine today. Some of them better than others. W
 
 The price is the higher token consumption and longer irrational work. Be warned.
 
+## Fork note: cost tiering for hobby use
+
+This fork diverges from [vshvedov/elephant-goldfish](https://github.com/vshvedov/elephant-goldfish) in one way: it defaults the pure ideation/critique commands to a cheaper model, since running everything on the top-tier model burns through Claude subscription usage limits (or API budget) fast for hobby-scale use.
+
+- `/eg-brainstorm` and `/eg-prd` are pinned to `model: haiku` in their frontmatter — nothing in these commands writes code, so the cheaper model is fine.
+- `/eg-new-feature` and `/eg-fix-bug` are left on whatever model your session is running (they mix design/diagnosis work with actual implementation, so a blanket pin doesn't fit). Each has a **Cost tip** callout at the point where implementation actually begins — that's the checkpoint to run `/model sonnet` (or whichever stronger model you want) before continuing.
+- `/eg-precommit-review` is left unpinned on purpose — it typically runs right after implementation, so it naturally inherits whatever stronger model you switched to.
+
+Combine this with running Claude Code on a metered API key (rather than a Pro/Max subscription) and a workspace spend cap in the Claude Console, if usage limits — not just cost — are the problem you're solving for.
+
 ## How to install
 
 ### Claude Code
@@ -24,7 +34,7 @@ In your target repo, open a Claude Code session and paste this message:
 
 ```
 Fetch the elephant-goldfish bootstrap procedure with
-`gh api repos/vshvedov/elephant-goldfish/contents/claude/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
+`gh api repos/joeltone/elephant-goldfish/contents/claude/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
 then follow the procedure to set up the elephant/goldfish workflow here, preserving any existing setups for other AIs.
 ```
 
@@ -45,7 +55,7 @@ In the same target repo, open a Codex session and paste this message:
 
 ```
 Fetch the Codex elephant-goldfish bootstrap procedure with
-`gh api repos/vshvedov/elephant-goldfish/contents/codex/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
+`gh api repos/joeltone/elephant-goldfish/contents/codex/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
 then follow the procedure to set up the Codex elephant/goldfish workflow here, preserving any existing setups for other AIs.
 ```
 
@@ -63,7 +73,7 @@ In your target repo, open a Gemini CLI session and paste this message:
 
 ```
 Fetch the Gemini CLI elephant-goldfish bootstrap procedure with
-`gh api repos/vshvedov/elephant-goldfish/contents/gemini/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
+`gh api repos/joeltone/elephant-goldfish/contents/gemini/BOOTSTRAP.md -H 'Accept: application/vnd.github.raw'`,
 then follow the procedure to set up the Gemini CLI elephant/goldfish workflow here, preserving any existing setups for other AIs.
 ```
 

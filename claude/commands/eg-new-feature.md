@@ -230,6 +230,8 @@ Free-form chat (for option 1 or 2) only happens AFTER this question has scoped t
 
 ## Step 3: Implementation plan
 
+**Cost tip:** if you're running on a cheaper default model for design/goldfish work, this is the checkpoint to run `/model sonnet` (or your preferred stronger model) before continuing — everything from here on is code.
+
 Once the design doc is `design ready`, write a short ordered implementation plan in chat:
 
 [BOOTSTRAP: implementation layer ordering for this stack. Examples:
