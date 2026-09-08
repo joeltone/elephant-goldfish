@@ -6,10 +6,14 @@ A cross-model pass is never spawned via the `Agent` tool (that tool only launche
 
 ## Provider registry
 
-| Provider | What it is | Secret-tool lookup | Invocation shape |
+Secrets are read from an environment variable first; `secret-tool` (Linux/GNOME
+keyring) is a fallback for shells that don't already export one, not a requirement.
+Windows/Git Bash has no `secret-tool` at all — set the env var directly there.
+
+| Provider | What it is | Secret env var (fallback: secret-tool) | Invocation shape |
 |---|---|---|---|
-| **DeepSeek** | `deepseek-chat` via DeepSeek's OpenAI-compatible chat-completions endpoint | `secret-tool lookup service deepseek account api` | Single request/response `curl` |
-| **Microsoft Copilot** | A published Microsoft Copilot Studio agent, reached over the Direct Line 3.0 protocol | `secret-tool lookup service ms-copilot account directline-secret` | Start conversation → post activity → poll for reply (3 calls) |
+| **DeepSeek** | `deepseek-chat` via DeepSeek's OpenAI-compatible chat-completions endpoint | `DEEPSEEK_API_KEY` (fallback: `secret-tool lookup service deepseek account api`) | Single request/response `curl` |
+| **Microsoft Copilot** | A published Microsoft Copilot Studio agent, reached over the Direct Line 3.0 protocol | `MS_COPILOT_DIRECTLINE_SECRET` (fallback: `secret-tool lookup service ms-copilot account directline-secret`) | Start conversation → post activity → poll for reply (3 calls) |
 
 Both are chosen by the user per-pass via the `AskUserQuestion` template below — neither runs unattended by default except where a command's own doc says otherwise (currently none; `eg-brainstorm` used to auto-run DeepSeek and now asks too, see its Step 0).
 
@@ -32,9 +36,12 @@ If the user picks one or more providers, run each per the invocation recipes bel
 ## Invocation: DeepSeek
 
 ```bash
-DEEPSEEK_KEY="$(secret-tool lookup service deepseek account api 2>/dev/null)"
+DEEPSEEK_KEY="${DEEPSEEK_API_KEY:-}"
+if [ -z "$DEEPSEEK_KEY" ] && command -v secret-tool >/dev/null 2>&1; then
+  DEEPSEEK_KEY="$(secret-tool lookup service deepseek account api 2>/dev/null)"
+fi
 if [ -z "$DEEPSEEK_KEY" ]; then
-  echo "DEEPSEEK_PASS_SKIPPED: no key in libsecret (secret-tool lookup service deepseek account api returned empty)"
+  echo "DEEPSEEK_PASS_SKIPPED: no key in \$DEEPSEEK_API_KEY or libsecret"
 else
   PROMPT_FILE=$(mktemp)
   cat > "$PROMPT_FILE" <<'EOF'
@@ -58,12 +65,25 @@ fi
 
 ## Invocation: Microsoft Copilot (Copilot Studio, Direct Line)
 
-Requires a published Copilot Studio agent with a channel that issues a Direct Line 3.0-compatible secret (Settings → Channels → "Custom channel", or "Mobile app" channel — [BOOTSTRAP: confirm channel name in the user's Copilot Studio tenant, naming varies by release]). Store that secret in libsecret as `service=ms-copilot account=directline-secret`. This is a 3-call conversation flow, not a single request/response — Copilot Studio replies asynchronously, so the script polls briefly.
+Requires a published Copilot Studio agent with a Direct Line secret. As of current
+Copilot Studio, this is **not** in the Channels gallery at all (there's no "Custom
+channel"/"Mobile app" tile issuing one) — it's under **Settings → Security → Web
+channel security**. Secret 1/Secret 2 are generated there by default and work as a
+Direct Line bearer credential immediately; the "Require secured access" toggle on
+that same page does not need to be on for a valid secret to authenticate — it only
+additionally blocks unsecured/no-secret access (e.g. the Demo website). Store the
+secret in the `MS_COPILOT_DIRECTLINE_SECRET` environment variable (or libsecret as
+`service=ms-copilot account=directline-secret` if your shell already uses it). This
+is a 3-call conversation flow, not a single request/response — Copilot Studio
+replies asynchronously, so the script polls briefly.
 
 ```bash
-COPILOT_SECRET="$(secret-tool lookup service ms-copilot account directline-secret 2>/dev/null)"
+COPILOT_SECRET="${MS_COPILOT_DIRECTLINE_SECRET:-}"
+if [ -z "$COPILOT_SECRET" ] && command -v secret-tool >/dev/null 2>&1; then
+  COPILOT_SECRET="$(secret-tool lookup service ms-copilot account directline-secret 2>/dev/null)"
+fi
 if [ -z "$COPILOT_SECRET" ]; then
-  echo "COPILOT_PASS_SKIPPED: no key in libsecret (secret-tool lookup service ms-copilot account directline-secret returned empty)"
+  echo "COPILOT_PASS_SKIPPED: no key in \$MS_COPILOT_DIRECTLINE_SECRET or libsecret"
 else
   # 1. Start a Direct Line conversation
   CONV=$(curl -sS --max-time 30 -X POST https://directline.botframework.com/v3/directline/conversations \
